@@ -1,0 +1,22 @@
+# Rust
+/target
+**/*.rs.bk
+
+# Secrets — keep .env.example, ignore the real one
+.env
+.env.*
+!.env.example
+
+# DB / runtime data
+/data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db

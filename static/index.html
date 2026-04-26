@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>🛡️ CISSP Exam Coach</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+  <style>
+    :root {
+      --bg0: #080c16; --bg1: #0f1525; --bg2: #162038; --bg3: #1d2a47;
+      --border: #1e2d4a; --border2: #2a3d5e;
+      --text: #dde4f0; --muted: #6b7fa3; --dim: #3a4d6e;
+      --accent: #5b6ef5; --accent-lt: #818cf8;
+      --green: #10b981; --green-dim: #031a10; --green-lt: #34d399;
+      --amber: #f59e0b; --amber-dim: #1c1108;
+      --red: #ef4444; --red-dim: #1a0606;
+      --purple: #a855f7; --purple-dim: #150a24;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg0); color: var(--text);
+      display: flex; flex-direction: column; height: 100vh;
+      font-size: 14px; line-height: 1.5;
+    }
+    .app-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px; height: 52px; background: var(--bg1);
+      border-bottom: 1px solid var(--border); flex-shrink: 0; gap: 12px;
+    }
+    .logo { display: flex; align-items: center; gap: 9px; font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
+    .logo-badge { background: var(--accent); color: #fff; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 99px; letter-spacing: 1px; }
+    .header-right { display: flex; gap: 6px; align-items: center; }
+
+    .tab-nav { display: flex; background: var(--bg1); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .tab-btn {
+      flex: 1; background: transparent; border: none; color: var(--muted);
+      font-size: 13px; font-weight: 700; padding: 11px 14px; cursor: pointer;
+      border-bottom: 2px solid transparent; font-family: inherit; letter-spacing: 0.3px;
+      transition: color 0.15s, background 0.15s, border-color 0.15s;
+    }
+    .tab-btn:hover { color: var(--text); background: var(--bg2); }
+    .tab-btn.active { color: var(--accent-lt); border-bottom-color: var(--accent); background: var(--bg0); }
+
+    .stats-bar {
+      display: flex; align-items: center; height: 34px; background: var(--bg0);
+      border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto;
+    }
+    .stats-bar::-webkit-scrollbar { display: none; }
+    .stat-item {
+      display: flex; align-items: center; gap: 5px; padding: 0 14px;
+      font-size: 12px; color: var(--muted); white-space: nowrap;
+      border-right: 1px solid var(--border); height: 100%;
+    }
+    .stat-val { font-weight: 700; color: var(--text); }
+    .stat-val.good { color: var(--green); }
+    .stat-val.warn { color: var(--amber); }
+    .stat-val.bad  { color: var(--red); }
+
+    .tab-pane { flex: 1; display: none; flex-direction: column; min-height: 0; }
+    .tab-pane.active { display: flex; }
+
+    .quiz-scroll { flex: 1; overflow-y: auto; padding: 20px 16px 24px; }
+    .quiz-scroll::-webkit-scrollbar { width: 12px; }
+    .quiz-scroll::-webkit-scrollbar-track { background: var(--bg1); }
+    .quiz-scroll::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 6px; border: 3px solid var(--bg1); }
+
+    .quiz-empty { max-width: 720px; margin: 0 auto; text-align: center; padding: 28px 16px 16px; }
+    .quiz-empty .welcome-icon { font-size: 54px; margin-bottom: 16px; }
+    .quiz-empty h1 { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+    .quiz-empty .sub { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 18px; }
+
+    .feature-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 20px; }
+    .chip { background: var(--bg2); border: 1px solid var(--border2); padding: 4px 11px; border-radius: 99px; font-size: 12px; color: var(--muted); }
+
+    .setup-box { background: var(--amber-dim); border: 1px solid #3d2508; border-radius: 10px; padding: 13px 15px; font-size: 13px; color: var(--amber); text-align: left; line-height: 1.6; }
+    .setup-box strong { color: #fbbf24; }
+
+    .dom-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; max-width: 920px; margin: 22px auto 0; text-align: left; }
+    .dom-card { background: var(--bg1); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; }
+    .dom-card h4 { font-size: 12.5px; color: var(--accent-lt); margin-bottom: 4px; font-weight: 700; display: flex; justify-content: space-between; gap: 8px; }
+    .dom-card .acc-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .dom-bar { height: 5px; background: var(--bg3); border-radius: 99px; margin: 5px 0 2px; overflow: hidden; }
+    .dom-bar-fill { height: 100%; background: var(--green); border-radius: 99px; transition: width 0.25s; }
+    .dom-bar-fill.warn { background: var(--amber); }
+    .dom-bar-fill.bad  { background: var(--red); }
+
+    .tier-badge { display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; padding: 1px 7px; border-radius: 99px; letter-spacing: 0.6px; }
+    .tier-1 { background: #052e1a; color: var(--green-lt); border: 1px solid #0a3a22; }
+    .tier-2 { background: #2a1d05; color: var(--amber); border: 1px solid #3d2508; }
+    .tier-3 { background: #2a0a18; color: #f472b6; border: 1px solid #4d122a; }
+    .tier-4 { background: #1c0a2e; color: #c084fc; border: 1px solid #3a1660; }
+
+    .dist-preview { background: var(--bg1); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; max-width: 720px; margin: 18px auto 14px; text-align: left; }
+    .dist-preview h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 10px; font-weight: 700; }
+    .dist-row { display: flex; align-items: center; gap: 10px; padding: 4px 0; font-size: 13px; }
+    .dist-row .dist-name { flex: 1; color: var(--text); }
+    .dist-row .dist-count { min-width: 36px; text-align: right; font-weight: 700; color: var(--accent-lt); }
+
+    .quiz-progress { display: flex; align-items: center; justify-content: space-between; max-width: 760px; margin: 0 auto 12px; font-size: 12px; color: var(--muted); gap: 12px; }
+    .progress-track { flex: 1; height: 6px; background: var(--bg3); border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-lt)); border-radius: 99px; transition: width 0.25s ease; }
+
+    .qcard { max-width: 760px; margin: 0 auto; background: var(--bg1); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px 16px; animation: fadeUp 0.18s ease; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .qcard-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+    .meta-chip { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 99px; letter-spacing: 0.4px; background: var(--bg2); color: var(--muted); border: 1px solid var(--border2); }
+    .meta-chip.dom { color: var(--accent-lt); }
+    .qstem { font-size: 15px; line-height: 1.6; color: var(--text); margin-bottom: 14px; white-space: pre-wrap; }
+    .opt-list { display: flex; flex-direction: column; gap: 8px; }
+    .opt-btn {
+      display: flex; align-items: flex-start; gap: 10px; width: 100%;
+      text-align: left; background: var(--bg2); border: 1px solid var(--border2);
+      color: var(--text); border-radius: 10px; padding: 11px 13px;
+      font-size: 14px; line-height: 1.5; font-family: inherit; cursor: pointer;
+      transition: background 0.12s, border-color 0.12s, transform 0.08s;
+    }
+    .opt-btn:hover:not(:disabled) { background: var(--bg3); border-color: var(--accent); }
+    .opt-btn:disabled { cursor: default; opacity: 0.85; }
+    .opt-letter { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--bg3); color: var(--muted); font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+    .opt-btn.correct { background: var(--green-dim); border-color: #0a3a22; }
+    .opt-btn.correct .opt-letter { background: var(--green); color: #fff; }
+    .opt-btn.incorrect { background: var(--red-dim); border-color: #4d0e0e; }
+    .opt-btn.incorrect .opt-letter { background: var(--red); color: #fff; }
+
+    .explain { margin-top: 14px; padding: 12px 14px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; font-size: 13px; line-height: 1.65; color: var(--text); }
+    .explain strong { color: var(--green-lt); }
+
+    .qcard-footer { display: flex; gap: 8px; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+    .qcard-footer .left, .qcard-footer .right { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .summary { max-width: 760px; margin: 0 auto; animation: fadeUp 0.2s ease; }
+    .summary-hero { text-align: center; padding: 18px 14px 8px; }
+    .summary-hero .big-pct { font-size: 44px; font-weight: 900; line-height: 1; letter-spacing: -1.5px; }
+    .summary-hero .big-pct.good { color: var(--green-lt); }
+    .summary-hero .big-pct.warn { color: var(--amber); }
+    .summary-hero .big-pct.bad  { color: var(--red); }
+    .summary-hero .sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+    .summary-block { background: var(--bg1); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin: 14px 0; }
+    .summary-block h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 10px; font-weight: 700; }
+    .summary-block ul { list-style: none; padding: 0; }
+    .tier-change { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px dashed var(--border); }
+    .tier-change:last-child { border-bottom: none; }
+    .tier-change .arrow.up   { color: var(--green-lt); font-weight: 700; }
+    .tier-change .arrow.down { color: var(--amber);   font-weight: 700; }
+    .tier-change .arrow.same { color: var(--muted); }
+    .missed-item { padding: 8px 0; border-bottom: 1px dashed var(--border); font-size: 13px; cursor: pointer; }
+    .missed-item:last-child { border-bottom: none; }
+    .missed-item:hover { color: var(--accent-lt); }
+    .missed-item .miss-meta { font-size: 11px; color: var(--muted); margin-bottom: 2px; letter-spacing: 0.3px; }
+
+    .quiz-toolbar { display: flex; gap: 8px; max-width: 760px; margin: 14px auto 0; flex-wrap: wrap; }
+
+    .gen-status { max-width: 540px; margin: 30px auto 0; background: var(--bg1); border: 1px solid var(--border); border-radius: 14px; padding: 22px 22px 18px; text-align: center; box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+    .gen-status .gen-title { font-size: 14px; font-weight: 700; color: var(--accent-lt); margin-bottom: 14px; letter-spacing: 0.3px; }
+    .gen-status .gen-line { font-size: 12.5px; color: var(--muted); margin-bottom: 3px; text-align: left; }
+    .gen-status .gen-plan { text-align: left; max-height: 110px; overflow-y: auto; margin: 12px 0 6px; padding: 8px 12px; background: var(--bg0); border: 1px solid var(--border); border-radius: 8px; }
+    .gen-status .gen-plan::-webkit-scrollbar { width: 6px; }
+    .gen-status .gen-plan::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+    /* Circular progress ring (SVG). Used for batch generation + study guide. */
+    .progress-ring-wrap {
+      position: relative; width: 168px; height: 168px;
+      margin: 6px auto 14px;
+    }
+    .progress-ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .progress-ring-track { fill: none; stroke: var(--bg3); }
+    .progress-ring-fill {
+      fill: none; stroke: url(#progressRingGradient);
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+      filter: drop-shadow(0 0 6px rgba(91, 110, 245, 0.45));
+    }
+    .progress-ring-fill.indet {
+      transform-origin: 84px 84px;
+      animation: ringSpin 1.4s linear infinite;
+    }
+    @keyframes ringSpin {
+      0%   { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .progress-ring-pulse {
+      position: absolute; inset: 0; border-radius: 50%;
+      box-shadow: 0 0 0 0 rgba(91, 110, 245, 0.45);
+      animation: ringPulse 2s ease-out infinite;
+      pointer-events: none;
+    }
+    @keyframes ringPulse {
+      0%   { box-shadow: 0 0 0 0 rgba(91, 110, 245, 0.4); }
+      70%  { box-shadow: 0 0 0 18px rgba(91, 110, 245, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(91, 110, 245, 0); }
+    }
+    .progress-ring-center {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      pointer-events: none;
+    }
+    .progress-ring-pct {
+      font-size: 34px; font-weight: 800; letter-spacing: -1.2px;
+      background: linear-gradient(135deg, var(--accent-lt), var(--purple));
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; color: var(--accent-lt);
+      line-height: 1;
+    }
+    .progress-ring-sub {
+      font-size: 10.5px; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 1.2px; margin-top: 6px; font-weight: 700;
+    }
+    .progress-ring-dots {
+      display: inline-flex; gap: 4px; align-items: center;
+      height: 34px;
+    }
+    .progress-ring-dots span {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent-lt);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+    .progress-ring-dots span:nth-child(2) { animation-delay: 0.18s; }
+    .progress-ring-dots span:nth-child(3) { animation-delay: 0.36s; }
+    .stage-label {
+      font-size: 13px; color: var(--text); margin-top: 10px;
+      min-height: 1.4em; transition: opacity 0.2s;
+    }
+    .stage-label.fading { opacity: 0.3; }
+    .stage-sub {
+      font-size: 11.5px; color: var(--muted); margin-top: 4px;
+    }
+
+    /* Chat */
+    .chat-pane-body { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+    .chat-area {
+      height: 100%; min-height: 0; overflow-y: auto; padding: 20px 16px 32px;
+      display: flex; flex-direction: column; gap: 18px;
+      scroll-behavior: smooth; overscroll-behavior: contain;
+    }
+    .chat-area::-webkit-scrollbar { width: 12px; }
+    .chat-area::-webkit-scrollbar-track { background: var(--bg1); }
+    .chat-area::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 6px; border: 3px solid var(--bg1); }
+
+    .jump-latest {
+      position: absolute; right: 18px; bottom: 14px; display: none;
+      align-items: center; gap: 6px; border: none; border-radius: 99px;
+      background: var(--accent); color: #fff; padding: 8px 14px;
+      font-size: 12.5px; font-weight: 700; font-family: inherit; cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5); z-index: 20;
+      animation: fadeUp 0.18s ease;
+    }
+    .jump-latest.visible { display: inline-flex; }
+    .jump-latest:hover { background: var(--accent-lt); }
+
+    .clear-chat {
+      position: absolute; right: 14px; top: 10px;
+      display: inline-flex; align-items: center; gap: 5px;
+      border: 1px solid var(--border2); border-radius: 99px;
+      background: rgba(15,21,37,0.85); color: var(--muted);
+      padding: 5px 11px; font-size: 11.5px; font-weight: 600;
+      font-family: inherit; cursor: pointer; z-index: 21;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+    .clear-chat:hover { color: var(--red); border-color: var(--red); background: var(--red-dim); }
+    .clear-chat:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .welcome { margin: auto; text-align: center; max-width: 520px; padding: 32px 16px; flex: 0 0 auto; }
+    .welcome-icon { font-size: 54px; margin-bottom: 16px; }
+    .welcome h1 { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+    .welcome-sub { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 18px; }
+
+    .msg { border-radius: 12px; border: 1px solid var(--border); overflow: hidden; flex: 0 0 auto; animation: fadeUp 0.18s ease; }
+    .msg-head { display: flex; align-items: center; justify-content: space-between; padding: 7px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid var(--border); }
+    .msg.user .msg-head { background: #0c1830; color: var(--accent-lt); }
+    .msg.ai   .msg-head { background: #041510; color: var(--green); }
+    .msg-body { padding: 14px 16px; font-size: 14px; line-height: 1.75; }
+    .msg.user .msg-body { background: var(--bg1); }
+    .msg.ai   .msg-body { background: #060f0c; }
+
+    .msg-body h1, .msg-body h2, .msg-body h3, .msg-body h4 { margin: 18px 0 7px; color: var(--accent-lt); }
+    .msg-body h1:first-child, .msg-body h2:first-child, .msg-body h3:first-child { margin-top: 0; }
+    .msg-body h2 { font-size: 15px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+    .msg-body p { margin: 7px 0; }
+    .msg-body p:first-child { margin-top: 0; }
+    .msg-body p:last-child  { margin-bottom: 0; }
+    .msg-body ul, .msg-body ol { padding-left: 20px; margin: 7px 0; }
+    .msg-body strong { color: #fff; font-weight: 700; }
+    .msg-body em { color: var(--amber); font-style: italic; }
+    .msg-body code { background: var(--bg3); color: #7dd3fc; padding: 2px 6px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 12.5px; }
+    .msg-body pre { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 13px 15px; overflow-x: auto; margin: 10px 0; }
+    .msg-body pre code { background: none; padding: 0; font-size: 13px; }
+    .msg-body table { border-collapse: collapse; width: 100%; font-size: 13px; margin: 12px 0; }
+    .msg-body th { background: var(--bg3); color: var(--accent-lt); padding: 8px 12px; text-align: left; border: 1px solid var(--border2); font-size: 11px; text-transform: uppercase; }
+    .msg-body td { padding: 7px 12px; border: 1px solid var(--border); vertical-align: top; }
+    .msg-body blockquote { border-left: 3px solid var(--accent); padding: 5px 0 5px 14px; color: var(--muted); margin: 8px 0; }
+    .msg-body a { color: var(--accent-lt); }
+
+    .thinking { display: flex; align-items: center; gap: 12px; padding: 13px 16px; background: #060f0c; border: 1px solid var(--border); border-radius: 12px; font-size: 13px; color: var(--muted); flex: 0 0 auto; }
+    .dots { display: flex; gap: 4px; }
+    .dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 1.4s ease-in-out infinite; }
+    .dots span:nth-child(2) { animation-delay: 0.2s; }
+    .dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse { 0%, 80%, 100% { opacity: 0.15; transform: scale(0.75); } 40% { opacity: 1; transform: scale(1); } }
+
+    .copy-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 13px; padding: 2px 6px; border-radius: 4px; transition: all 0.15s; }
+    .copy-btn:hover { background: var(--bg3); color: var(--text); }
+
+    .input-area { flex-shrink: 0; background: var(--bg1); border-top: 1px solid var(--border); padding: 10px 14px 12px; }
+    .input-row { display: flex; gap: 8px; align-items: flex-end; }
+    textarea.qinput {
+      flex: 1; background: var(--bg2); border: 1px solid var(--border2);
+      border-radius: 10px; padding: 10px 13px; color: var(--text); font-size: 14px;
+      font-family: inherit; resize: none; min-height: 42px; max-height: 140px;
+      outline: none; line-height: 1.5; transition: border-color 0.15s;
+    }
+    textarea.qinput:focus { border-color: var(--accent); }
+    textarea.qinput::placeholder { color: var(--muted); }
+    textarea.qinput:disabled { opacity: 0.4; }
+
+    .btn { display: inline-flex; align-items: center; gap: 5px; border: 1px solid transparent; border-radius: 8px; padding: 8px 13px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.15s; font-family: inherit; line-height: 1; }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+    .btn-primary { background: var(--accent); color: #fff; padding: 10px 18px; }
+    .btn-primary:hover { background: var(--accent-lt); }
+    .btn-ghost { background: transparent; color: var(--muted); border-color: var(--border2); }
+    .btn-ghost:hover { background: var(--bg2); color: var(--text); border-color: var(--dim); }
+    .btn-amber { background: var(--amber-dim); color: var(--amber); border-color: #3d2508; }
+    .btn-purple { background: var(--purple-dim); color: var(--purple); border-color: #3a1660; }
+    .btn-red { background: transparent; color: var(--red); padding: 7px 10px; }
+    .btn-red:hover { border-color: var(--red); background: var(--red-dim); }
+
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 999; padding: 16px; }
+    .overlay.hidden { display: none; }
+    .modal { background: var(--bg1); border: 1px solid var(--border2); border-radius: 16px; padding: 24px; width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto; box-shadow: 0 30px 80px rgba(0,0,0,0.7); }
+    .modal-title { font-size: 17px; font-weight: 800; margin-bottom: 20px; }
+    .fgrp { margin-bottom: 15px; }
+    .flabel { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-bottom: 6px; }
+    .fselect { width: 100%; background: var(--bg2); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 14px; font-family: inherit; outline: none; }
+    .fselect option { background: var(--bg2); }
+    .fhint { font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+    .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .db-row { display: flex; gap: 8px; flex-wrap: wrap; padding: 10px 0; border-top: 1px solid var(--border); margin-top: 14px; }
+    .key-status { display: flex; gap: 14px; padding: 10px 12px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 8px; font-size: 12.5px; }
+    .key-status .ok  { color: var(--green); }
+    .key-status .err { color: var(--red); }
+
+    @media (max-width: 480px) {
+      .logo-badge { display: none; }
+      .msg-body { font-size: 13.5px; }
+      .chat-area { padding: 14px 10px 24px; }
+      .qcard { padding: 14px; }
+      .qstem { font-size: 14px; }
+      .opt-btn { padding: 10px; font-size: 13.5px; }
+      .summary-hero .big-pct { font-size: 36px; }
+      .dom-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Settings Modal -->
+<div class="overlay hidden" id="settingsModal" onclick="overlayClick(event)">
+  <div class="modal">
+    <div class="modal-title">⚙️ Coach Settings</div>
+
+    <div class="fgrp">
+      <label class="flabel">API keys</label>
+      <div class="key-status" id="keyStatus">…</div>
+      <div class="fhint">Keys live in the server-side <code>.env</code>. To change them, edit <code>.env</code> and restart the server.</div>
+    </div>
+
+    <div class="fgrp">
+      <label class="flabel">Provider</label>
+      <select class="fselect" id="providerSelect" onchange="onProviderChange()">
+        <option value="openai">OpenAI</option>
+        <option value="anthropic">Anthropic</option>
+      </select>
+    </div>
+
+    <div class="fgrp">
+      <label class="flabel">Model</label>
+      <select class="fselect" id="modelSelect"></select>
+    </div>
+
+    <div class="db-row">
+      <button class="btn btn-ghost" onclick="exportDB()">📥 Export DB</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">📤 Import DB</button>
+      <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importDB(event)" />
+      <button class="btn btn-red" onclick="resetAllData()" style="margin-left:auto">🗑️ Reset All Data</button>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSettings()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<header class="app-header">
+  <div class="logo">🛡️ CISSP Coach <span class="logo-badge">SERVER</span></div>
+  <div class="header-right">
+    <button class="btn btn-ghost" onclick="openSettings()">⚙️ Settings</button>
+  </div>
+</header>
+
+<div class="tab-nav">
+  <button class="tab-btn active" id="tabBtn-quiz" onclick="switchTab('quiz')">📝 Quiz Mode</button>
+  <button class="tab-btn"        id="tabBtn-chat" onclick="switchTab('chat')">💬 Chat Coach</button>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item">📊 Total Q <span class="stat-val" id="sTotal">0</span></div>
+  <div class="stat-item">✅ Accuracy <span class="stat-val" id="sAcc">—</span></div>
+  <div class="stat-item">🎯 Weakest <span class="stat-val" id="sWeak">—</span></div>
+  <div class="stat-item">🤖 <span class="stat-val" id="sP">…</span> · <span class="stat-val" id="sM">…</span></div>
+</div>
+
+<div class="tab-pane active" id="pane-quiz">
+  <div class="quiz-scroll" id="quizScroll"></div>
+</div>
+
+<div class="tab-pane" id="pane-chat">
+  <div class="chat-pane-body">
+    <button class="clear-chat" id="btnClearChat" onclick="clearChatHistory()" title="Delete all chat history">🗑️ Clear Chat</button>
+    <div class="chat-area" id="chatArea" onscroll="onChatScroll()">
+      <div class="welcome" id="welcomeScreen">
+        <div class="welcome-icon">💬</div>
+        <h1>Chat Coach</h1>
+        <p class="welcome-sub">Paste any CISSP question for a 7-step "Think Like a Manager" breakdown.</p>
+      </div>
+    </div>
+    <button class="jump-latest" id="jumpLatest" onclick="jumpToLatest()">↓ Latest</button>
+  </div>
+  <div class="input-area">
+    <div class="input-row">
+      <textarea class="qinput" id="qInput" placeholder="Paste a CISSP question here… (Enter to send, Shift+Enter for new line)" rows="1" onkeydown="handleKey(event)" oninput="grow(this)"></textarea>
+      <button class="btn btn-primary" id="bSend" onclick="submit()">Send ➤</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ─── Constants ──────────────────────────────────────────────────────────── */
+const DOMAINS = {
+  1: { name: 'Security & Risk Management',          short: 'Risk Mgmt' },
+  2: { name: 'Asset Security',                      short: 'Asset Sec' },
+  3: { name: 'Security Architecture & Engineering', short: 'Arch / Eng' },
+  4: { name: 'Communication & Network Security',    short: 'Network' },
+  5: { name: 'Identity & Access Management',        short: 'IAM' },
+  6: { name: 'Security Assessment & Testing',       short: 'Assess' },
+  7: { name: 'Security Operations',                 short: 'SecOps' },
+  8: { name: 'Software Development Security',       short: 'SDLC' },
+};
+const TIERS = {
+  1: { name: 'Easy',     short: 'E' },
+  2: { name: 'Moderate', short: 'M' },
+  3: { name: 'Hard',     short: 'H' },
+  4: { name: 'Expert',   short: 'X' },
+};
+const MODELS = {
+  openai: [
+    { id: 'gpt-4o',        label: 'GPT-4o — Best (recommended)' },
+    { id: 'gpt-4o-mini',   label: 'GPT-4o Mini — Faster & cheaper' },
+    { id: 'gpt-4-turbo',   label: 'GPT-4 Turbo' },
+    { id: 'gpt-4',         label: 'GPT-4' },
+    { id: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
+  ],
+  anthropic: [
+    { id: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6 — Best balance (recommended)' },
+    { id: 'claude-opus-4-7',   label: 'Claude Opus 4.7 — Most capable' },
+    { id: 'claude-opus-4-6',   label: 'Claude Opus 4.6' },
+    { id: 'claude-sonnet-4-5', label: 'Claude Sonnet 4.5' },
+    { id: 'claude-haiku-4-5',  label: 'Claude Haiku 4.5 — Fastest & cheapest' },
+  ],
+};
+
+/* ─── State ──────────────────────────────────────────────────────────────── */
+let settings = { provider: 'openai', model: 'gpt-4o', has_openai: false, has_anthropic: false };
+let dashboard = null;
+let currentBatch = null;
+let activeTab = 'quiz';
+let busy = false;
+let chatPinnedToBottom = true;
+
+/* ─── Marked ─────────────────────────────────────────────────────────────── */
+marked.use({ breaks: true, gfm: true });
+
+/* ─── API helpers ────────────────────────────────────────────────────────── */
+async function apiGet(path) {
+  const r = await fetch(path);
+  if (!r.ok) throw new Error(`${path}: ${(await safeErr(r)).error || r.status}`);
+  return r.json();
+}
+async function apiSend(method, path, body) {
+  const r = await fetch(path, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: body == null ? null : JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error((await safeErr(r)).error || `HTTP ${r.status}`);
+  if (r.status === 204) return null;
+  return r.json();
+}
+const apiPost  = (p, b)    => apiSend('POST',   p, b);
+const apiPatch = (p, b)    => apiSend('PATCH',  p, b);
+const apiDel   = (p)       => apiSend('DELETE', p, null);
+async function safeErr(r) { try { return await r.json(); } catch { return {}; } }
+
+/**
+ * SSE helper using fetch + ReadableStream so we can POST a JSON body
+ * (EventSource only supports GET).
+ */
+async function apiSSE(path, body, handlers) {
+  const res = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+    body: body == null ? null : JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const e = await safeErr(res);
+    throw new Error(e.error || `HTTP ${res.status}`);
+  }
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let buf = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let idx;
+    while ((idx = buf.indexOf('\n\n')) !== -1) {
+      const block = buf.slice(0, idx);
+      buf = buf.slice(idx + 2);
+      let event = 'message', data = '';
+      for (const line of block.split('\n')) {
+        if (line.startsWith('event:')) event = line.slice(6).trim();
+        else if (line.startsWith('data:')) data += line.slice(5).trim();
+      }
+      if (handlers[event]) {
+        try { handlers[event](data ? JSON.parse(data) : null); }
+        catch (e) { console.warn('sse parse', e); }
+      }
+    }
+  }
+  if (handlers.close) handlers.close();
+}
+
+/* ─── Init ───────────────────────────────────────────────────────────────── */
+(async function init() {
+  try {
+    settings = await apiGet('/api/settings');
+  } catch (e) {
+    console.error('settings load failed', e);
+  }
+  await refreshDashboard();
+  await refreshCurrentBatch();
+  await renderChatHistory();
+  updateStats();
+  renderQuizPane();
+})();
+
+async function refreshDashboard() {
+  try { dashboard = await apiGet('/api/dashboard'); }
+  catch (e) { console.error(e); dashboard = null; }
+}
+async function refreshCurrentBatch() {
+  try { currentBatch = await apiGet('/api/batches/current'); }
+  catch (e) { console.error(e); currentBatch = null; }
+}
+
+/* ─── Stats bar ──────────────────────────────────────────────────────────── */
+function updateStats() {
+  document.getElementById('sTotal').textContent = dashboard?.total_questions ?? 0;
+  const accEl = document.getElementById('sAcc');
+  const acc = dashboard?.overall_accuracy;
+  if (acc == null) { accEl.textContent = '—'; accEl.className = 'stat-val'; }
+  else {
+    const pct = Math.round(acc * 100);
+    accEl.textContent = `${pct}%`;
+    accEl.className = 'stat-val ' + (pct >= 75 ? 'good' : pct >= 50 ? 'warn' : 'bad');
+  }
+  const wEl = document.getElementById('sWeak');
+  const w = dashboard?.weakest_domain;
+  if (!w) { wEl.textContent = '—'; wEl.className = 'stat-val'; }
+  else { wEl.textContent = `D${w} ${DOMAINS[w].short}`; wEl.className = 'stat-val warn'; }
+
+  document.getElementById('sP').textContent = settings.provider === 'anthropic' ? 'Anthropic' : 'OpenAI';
+  document.getElementById('sM').textContent = settings.model;
+}
+
+/* ─── Tabs ───────────────────────────────────────────────────────────────── */
+function switchTab(name) {
+  activeTab = name;
+  document.getElementById('tabBtn-quiz').classList.toggle('active', name === 'quiz');
+  document.getElementById('tabBtn-chat').classList.toggle('active', name === 'chat');
+  document.getElementById('pane-quiz').classList.toggle('active', name === 'quiz');
+  document.getElementById('pane-chat').classList.toggle('active', name === 'chat');
+  if (name === 'quiz') renderQuizPane();
+  if (name === 'chat') requestAnimationFrame(updateJumpLatest);
+}
+
+/* ─── Quiz: rendering ────────────────────────────────────────────────────── */
+function quizRoot() { return document.getElementById('quizScroll'); }
+
+function renderQuizPane() {
+  if (currentBatch && !currentBatch.finished && currentBatch.idx < currentBatch.total) {
+    renderCurrentQuestion();
+  } else {
+    renderQuizEmpty();
+  }
+}
+
+function renderQuizEmpty() {
+  const el = quizRoot();
+  if (!dashboard) { el.innerHTML = `<div class="quiz-empty"><p class="sub">Loading…</p></div>`; return; }
+  let domGrid = '';
+  let distPreview = '';
+  let distTotal = 0;
+  for (const d of dashboard.domains) {
+    const lifetime = d.lifetime_accuracy;
+    const accPct = lifetime == null ? '—' : `${Math.round(lifetime * 100)}%`;
+    const fillPct = lifetime == null ? 0 : Math.round(lifetime * 100);
+    let fillCls = 'good';
+    if (lifetime != null && lifetime < 0.50) fillCls = 'bad';
+    else if (lifetime != null && lifetime < 0.75) fillCls = 'warn';
+    const plannedTotal = d.planned_count + (d.stretch_count || 0);
+    distTotal += plannedTotal;
+    domGrid += `
+      <div class="dom-card">
+        <h4>
+          <span>D${d.domain} · ${escapeHTML(d.short)}</span>
+          <span class="tier-badge tier-${d.tier}">${TIERS[d.tier].short}</span>
+        </h4>
+        <div class="dom-bar"><div class="dom-bar-fill ${fillCls}" style="width:${fillPct}%"></div></div>
+        <div class="acc-row">
+          <span>${d.attempted} attempted · ${accPct}</span>
+          <span>Next: ${plannedTotal}</span>
+        </div>
+      </div>`;
+    distPreview += `
+      <div class="dist-row">
+        <span class="tier-badge tier-${d.tier}">${TIERS[d.tier].short}</span>
+        <span class="dist-name">D${d.domain} ${escapeHTML(d.name)}</span>
+        <span class="dist-count">${plannedTotal}${
+          d.stretch_count ? ` <span style="color:var(--muted);font-weight:400">(+${d.stretch_count} stretch)</span>` : ''
+        }</span>
+      </div>`;
+  }
+  const totalQ = dashboard.total_questions;
+  const acc = dashboard.overall_accuracy == null ? '—' : `${Math.round(dashboard.overall_accuracy * 100)}%`;
+  const noKey = !settings.has_openai && !settings.has_anthropic;
+  el.innerHTML = `
+    <div class="quiz-empty">
+      <div class="welcome-icon">🛡️</div>
+      <h1>CISSP Adaptive Quiz</h1>
+      <p class="sub">
+        Generate <strong>50 questions</strong> across all eight CISSP domains.
+        Each batch is weighted toward your weakest areas, and difficulty ratchets up
+        per-domain as you improve. Hit <strong>Coach this</strong> on any answered
+        question for a full 7-step breakdown.
+      </p>
+      <div class="feature-chips">
+        <span class="chip">📚 ${totalQ} in DB</span>
+        <span class="chip">✅ ${acc} overall</span>
+        <span class="chip">🎯 Adaptive weighting</span>
+        <span class="chip">📈 Tier promotion</span>
+      </div>
+      ${ noKey ? `<div class="setup-box" style="margin-bottom:14px">
+        ⚠️ <strong>No API key configured.</strong> Set <code>OPENAI_API_KEY</code> or
+        <code>ANTHROPIC_API_KEY</code> in <code>.env</code> on the server, then restart.
+      </div>` : ''}
+      <button class="btn btn-primary" id="btnGenerate" onclick="generateBatch()" ${noKey ? 'disabled' : ''}>🎯 Generate 50 Questions</button>
+      <button class="btn btn-purple" id="btnGlobalStudyGuide" onclick="downloadGlobalStudyGuide(this)" style="margin-left:8px" title="Build a PDF from every missed question across all batches">📚 Generate Study Guide (All Misses)</button>
+      <div class="dist-preview">
+        <h3>Next batch — adaptive distribution (${distTotal})</h3>
+        ${distPreview}
+      </div>
+      <div class="dom-grid">${domGrid}</div>
+    </div>`;
+}
+
+/* ─── Progress ring (SVG) ────────────────────────────────────────────────────────────── */
+const RING_RADIUS = 70;
+const RING_CIRC   = 2 * Math.PI * RING_RADIUS;  // ≈ 439.82
+
+/**
+ * Returns the HTML for a circular progress ring. Pass `indeterminate: true`
+ * to render a spinning quarter-arc (no percentage). Otherwise pass `pct` (0-100).
+ * `centerLabel` overrides the percentage text (e.g. show "42 / 50" instead).
+ */
+function progressRingHTML(opts) {
+  const o = opts || {};
+  const indet = !!o.indeterminate;
+  // For indeterminate, render a partial arc (~25%) that rotates via CSS.
+  const dashArray  = indet ? `${RING_CIRC * 0.28} ${RING_CIRC}` : `${RING_CIRC}`;
+  const dashOffset = indet ? '0' : `${RING_CIRC * (1 - Math.max(0, Math.min(1, (o.pct || 0) / 100)))}`;
+  const fillCls    = indet ? 'progress-ring-fill indet' : 'progress-ring-fill';
+  const centerHTML = indet
+    ? '<div class="progress-ring-dots"><span></span><span></span><span></span></div>'
+    : `<div class="progress-ring-pct" id="ringPct">${Math.round(o.pct || 0)}%</div>`;
+  const sub = o.sub || '';
+  return `
+    <div class="progress-ring-wrap">
+      <div class="progress-ring-pulse"></div>
+      <svg class="progress-ring-svg" viewBox="0 0 168 168">
+        <defs>
+          <linearGradient id="progressRingGradient" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%"  stop-color="#5b6ef5" />
+            <stop offset="55%" stop-color="#818cf8" />
+            <stop offset="100%" stop-color="#a855f7" />
+          </linearGradient>
+        </defs>
+        <circle class="progress-ring-track" cx="84" cy="84" r="${RING_RADIUS}" stroke-width="10" />
+        <circle id="ringFill" class="${fillCls}" cx="84" cy="84" r="${RING_RADIUS}" stroke-width="10"
+                stroke-dasharray="${dashArray}" stroke-dashoffset="${dashOffset}" />
+      </svg>
+      <div class="progress-ring-center">
+        ${centerHTML}
+        ${sub ? `<div class="progress-ring-sub" id="ringSub">${escapeHTML(sub)}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+/** Update an in-DOM ring's fill (#ringFill) + percentage (#ringPct) + sub (#ringSub). */
+function updateProgressRing(pct, centerText, subText) {
+  const fill = document.getElementById('ringFill');
+  const pctEl = document.getElementById('ringPct');
+  const subEl = document.getElementById('ringSub');
+  if (fill) {
+    const clamped = Math.max(0, Math.min(100, pct));
+    fill.setAttribute('stroke-dashoffset', `${RING_CIRC * (1 - clamped / 100)}`);
+  }
+  if (pctEl && centerText !== undefined) pctEl.textContent = centerText;
+  if (subEl && subText !== undefined) subEl.textContent = subText;
+}
+
+/* ─── Study guide download (per-batch + global) ───────────────────────── */
+const STUDY_GUIDE_STAGES = [
+  { at:  0, label: 'Gathering missed questions…' },
+  { at:  3, label: 'AI is analysing miss patterns…' },
+  { at: 12, label: 'Drafting domain-by-domain notes…' },
+  { at: 22, label: 'Rendering PDF (ReportLab)…' },
+  { at: 32, label: 'Almost there—finalising…' },
+];
+
+/**
+ * Builds an in-place progress card pinned to the TOP of the quiz scroll area
+ * (so the user never has to scroll to find it) with an indeterminate ring
+ * plus a rotating stage label. Returns `{done, fail}` to tear it down.
+ */
+function mountStudyGuideProgress(title) {
+  const root = document.getElementById('quizScroll');
+  const wrap = document.createElement('div');
+  wrap.className = 'gen-status';
+  wrap.style.maxWidth = '420px';
+  wrap.style.marginTop = '14px';
+  wrap.innerHTML = `
+    <div class="gen-title">${escapeHTML(title)}</div>
+    ${progressRingHTML({ indeterminate: true, sub: 'Working' })}
+    <div class="stage-label" id="sgStageLabel">Gathering missed questions…</div>
+    <div class="stage-sub" id="sgStageSub">This may take 20–40 seconds for large miss lists.</div>`;
+
+  // Mount at the top of the scrollable quiz pane so it's immediately visible
+  // regardless of where the triggering button sits in the page.
+  if (root) {
+    root.insertBefore(wrap, root.firstChild);
+    root.scrollTo({ top: 0, behavior: 'smooth' });
+    // After layout settles, ensure the card itself is centred in the viewport.
+    setTimeout(() => {
+      try { wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch {}
+    }, 60);
+  } else {
+    document.body.appendChild(wrap);
+  }
+
+  const startedAt = Date.now();
+  let stageIdx = 0;
+  const tick = setInterval(() => {
+    const elapsed = (Date.now() - startedAt) / 1000;
+    while (stageIdx + 1 < STUDY_GUIDE_STAGES.length && elapsed >= STUDY_GUIDE_STAGES[stageIdx + 1].at) {
+      stageIdx++;
+      const lbl = document.getElementById('sgStageLabel');
+      if (lbl) {
+        lbl.classList.add('fading');
+        setTimeout(() => {
+          lbl.textContent = STUDY_GUIDE_STAGES[stageIdx].label;
+          lbl.classList.remove('fading');
+        }, 180);
+      }
+    }
+  }, 500);
+
+  return {
+    done() {
+      clearInterval(tick);
+      wrap.remove();
+    },
+    fail() {
+      clearInterval(tick);
+      wrap.remove();
+    },
+  };
+}
+
+async function downloadGlobalStudyGuide(btn) {
+  if (btn?.dataset.busy === '1') return;
+  btn.dataset.busy = '1';
+  btn.disabled = true;
+  btn.style.display = 'none';
+  const ctl = mountStudyGuideProgress('📚 Building all-misses study guide…');
+  try {
+    const res = await fetch('/api/study-guide/all-misses', { method: 'POST' });
+    if (!res.ok) {
+      const err = await safeErr(res);
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    const blob = await res.blob();
+    const cd = res.headers.get('content-disposition') || '';
+    const m = cd.match(/filename="?([^";]+)"?/i);
+    const fname = m ? m[1] : `cissp-all-misses-${new Date().toISOString().slice(0,10)}.pdf`;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fname;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    ctl.done();
+    btn.style.display = '';
+    btn.disabled = false; btn.dataset.busy = '0';
+  } catch (e) {
+    ctl.fail(e.message);
+    btn.style.display = '';
+    btn.disabled = false; btn.dataset.busy = '0';
+    alert('Study guide failed: ' + e.message + '\n\nThis feature requires Python + ReportLab on the server. Run:\n  python -m pip install -r requirements.txt');
+  }
+}
+
+function renderQuizGenerating(plan, total) {
+  let lines = '';
+  for (const p of plan) {
+    const tot = p.count + (p.stretch?.count || 0);
+    lines += `<div class="gen-line">D${p.domain} ${DOMAINS[p.domain].short}: ${tot} @ ${TIERS[p.tier].name}${p.stretch ? ` (+${p.stretch.count} ${TIERS[p.stretch.tier].name})` : ''}</div>`;
+  }
+  quizRoot().innerHTML = `
+    <div class="gen-status">
+      <div class="gen-title">🛠️ Generating ${total} CISSP questions…</div>
+      ${progressRingHTML({ pct: 1, sub: `0 / ${total}` })}
+      <div class="gen-line" style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:8px">
+        Provider: <strong style="color:var(--accent-lt)">${settings.provider}</strong> ·
+        Model: <strong style="color:var(--accent-lt)">${escapeHTML(settings.model)}</strong>
+      </div>
+      <div class="gen-plan">${lines}</div>
+    </div>`;
+}
+
+function updateGenStatus(parsed, total) {
+  const t = total || 50;
+  const p = Math.min(parsed, t);
+  const pct = (p / t) * 100;
+  updateProgressRing(pct, `${p}/${t}`, p < t ? 'parsing' : 'finalizing');
+}
+
+function renderQuizError(msg) {
+  quizRoot().innerHTML = `
+    <div class="quiz-empty">
+      <div class="welcome-icon">⚠️</div>
+      <h1>Generation Failed</h1>
+      <p class="sub">${escapeHTML(msg)}</p>
+      <div class="quiz-toolbar" style="justify-content:center">
+        <button class="btn btn-primary" onclick="renderQuizEmpty()">↩️ Back</button>
+        <button class="btn btn-amber"   onclick="generateBatch()">🔁 Retry</button>
+      </div>
+    </div>`;
+}
+
+function renderCurrentQuestion() {
+  const cb = currentBatch;
+  if (!cb || !cb.question) { renderQuizEmpty(); return; }
+  const q = cb.question;
+  const total = cb.total;
+  const num   = cb.idx + 1;
+  const pct   = Math.round((num - 1) / total * 100);
+  const answered = q.user_answer != null;
+  let optsHTML = '';
+  for (const L of ['A', 'B', 'C', 'D']) {
+    let cls = '';
+    if (answered) {
+      if (L === q.correct) cls = 'correct';
+      else if (L === q.user_answer) cls = 'incorrect';
+    }
+    optsHTML += `
+      <button class="opt-btn ${cls}" ${answered ? 'disabled' : ''}
+              onclick="answerCurrent('${L}')">
+        <span class="opt-letter">${L}</span>
+        <span>${escapeHTML(q.options[L] || '')}</span>
+      </button>`;
+  }
+  const explainHTML = answered
+    ? `<div class="explain"><strong>${q.is_correct ? '✅ Correct' : '❌ Incorrect'}</strong> — ${escapeHTML(q.explanation || 'No explanation provided.')}</div>`
+    : '';
+  const footerHTML = `
+    <div class="qcard-footer">
+      <div class="left">
+        ${ answered ? `<button class="btn btn-purple" onclick="coachThis('${q.id}')">🧠 Coach this</button>` : '' }
+        <button class="btn btn-red" onclick="cancelBatch()">✖ End Batch</button>
+      </div>
+      <div class="right">
+        <button class="btn btn-ghost" onclick="skipQuestion()" ${answered ? 'style="display:none"' : ''}>⏭️ Skip</button>
+        <button class="btn btn-primary" onclick="nextQuestion()" ${!answered ? 'disabled' : ''}>Next ➤</button>
+      </div>
+    </div>`;
+  quizRoot().innerHTML = `
+    <div class="quiz-progress">
+      <span>Question <strong style="color:var(--text)">${num}</strong> / ${total}</span>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <span>${total - num} left</span>
+    </div>
+    <div class="qcard">
+      <div class="qcard-meta">
+        <span class="meta-chip dom">D${q.domain} · ${DOMAINS[q.domain].short}</span>
+        <span class="meta-chip">${escapeHTML(q.subtopic || 'CISSP')}</span>
+        <span class="tier-badge tier-${q.difficulty}">${TIERS[q.difficulty].name}</span>
+      </div>
+      <div class="qstem">${escapeHTML(q.question)}</div>
+      <div class="opt-list">${optsHTML}</div>
+      ${explainHTML}
+      ${footerHTML}
+    </div>`;
+}
+
+/* ─── Quiz: actions ──────────────────────────────────────────────────────── */
+async function generateBatch() {
+  if (busy) return;
+  busy = true;
+  let total = 50, plan = [];
+  try {
+    await apiSSE('/api/batches/generate', null, {
+      plan: ev => { plan = ev.plan; total = ev.total; renderQuizGenerating(plan, total); },
+      progress: ev => updateGenStatus(ev.parsed || 0, ev.total || total),
+      done: async () => {
+        await refreshDashboard();
+        await refreshCurrentBatch();
+        updateStats();
+        renderCurrentQuestion();
+      },
+      error: ev => renderQuizError(ev.message || 'Unknown error'),
+    });
+  } catch (e) {
+    renderQuizError(e.message);
+  }
+  busy = false;
+}
+
+async function answerCurrent(letter) {
+  if (!currentBatch?.batch_id) return;
+  try {
+    const r = await apiPost(`/api/batches/${currentBatch.batch_id}/answer`, { letter });
+    currentBatch.question = r.question;
+    currentBatch.idx = r.idx;
+    currentBatch.total = r.total;
+    await refreshDashboard();
+    updateStats();
+    renderCurrentQuestion();
+  } catch (e) { alert(e.message); }
+}
+
+async function skipQuestion() {
+  if (!currentBatch?.batch_id) return;
+  try {
+    const r = await apiPost(`/api/batches/${currentBatch.batch_id}/skip`, {});
+    currentBatch.idx = r.idx;
+    currentBatch.total = r.total;
+    currentBatch.question = r.question;
+    if (currentBatch.idx >= currentBatch.total) await finishCurrentBatch();
+    else renderCurrentQuestion();
+  } catch (e) { alert(e.message); }
+}
+
+async function nextQuestion() {
+  if (!currentBatch?.batch_id) return;
+  if (currentBatch.idx + 1 >= currentBatch.total) {
+    await finishCurrentBatch();
+    return;
+  }
+  await skipQuestion();
+}
+
+async function finishCurrentBatch() {
+  const id = currentBatch.batch_id;
+  try {
+    const summary = await apiPost(`/api/batches/${id}/finish`, {});
+    currentBatch = null;
+    await refreshDashboard();
+    updateStats();
+    renderBatchSummary(summary);
+  } catch (e) { alert(e.message); }
+}
+
+async function cancelBatch() {
+  if (!currentBatch?.batch_id) return;
+  if (!confirm('End this batch and return to the dashboard?\n\nQuestions you already answered stay in the DB and continue to count toward your domain stats. Difficulty progression for this batch is skipped (unfinished).')) return;
+  try {
+    await apiPost(`/api/batches/${currentBatch.batch_id}/cancel`, {});
+    currentBatch = null;
+    await refreshDashboard();
+    await refreshCurrentBatch();
+    updateStats();
+    renderQuizEmpty();
+  } catch (e) { alert(e.message); }
+}
+
+function renderBatchSummary(s) {
+  const pct = s.answered ? Math.round(s.correct / s.answered * 100) : 0;
+  let pctCls = 'good';
+  if (pct < 50) pctCls = 'bad';
+  else if (pct < 75) pctCls = 'warn';
+
+  let domHTML = '';
+  for (const r of s.per_domain || []) {
+    const p = r.attempted ? Math.round(r.correct / r.attempted * 100) : 0;
+    const cls = p >= 75 ? 'up' : p >= 50 ? 'same' : 'down';
+    domHTML += `
+      <div class="tier-change">
+        <span>D${r.domain} · ${escapeHTML(r.short)} <span style="color:var(--muted)">(${r.correct}/${r.attempted})</span></span>
+        <span class="arrow ${cls}">${p}%</span>
+      </div>`;
+  }
+  let tcHTML = '';
+  const tc = s.tier_changes || {};
+  for (const d in tc) {
+    const ch = tc[d];
+    let arrow = '<span class="arrow same">·</span>';
+    let txt = `${TIERS[ch.from].name}`;
+    if (ch.to > ch.from) { arrow = '<span class="arrow up">⬆</span>'; txt = `${TIERS[ch.from].name} → ${TIERS[ch.to].name}`; }
+    else if (ch.to < ch.from) { arrow = '<span class="arrow down">⬇</span>'; txt = `${TIERS[ch.from].name} → ${TIERS[ch.to].name}`; }
+    tcHTML += `<div class="tier-change"><span>D${d} · ${DOMAINS[d].short}</span><span>${txt} ${arrow}</span></div>`;
+  }
+  if (!tcHTML) tcHTML = `<div style="font-size:13px;color:var(--muted)">Not enough recent answers per domain to adjust tiers yet.</div>`;
+  let missedHTML = '';
+  if (!s.missed?.length) missedHTML = `<div style="font-size:13px;color:var(--green-lt)">🔥 No misses this batch.</div>`;
+  else {
+    missedHTML = s.missed.map(q => `
+      <li class="missed-item" onclick="coachThis('${q.id}')">
+        <div class="miss-meta">D${q.domain} · ${escapeHTML(q.domain_short)} · ${escapeHTML(q.tier_name)} · You: ${escapeHTML(q.user_answer || '—')} · Correct: ${escapeHTML(q.correct)}</div>
+        ${escapeHTML((q.question || '').slice(0, 160))}${(q.question || '').length > 160 ? '…' : ''}
+      </li>`).join('');
+  }
+  quizRoot().innerHTML = `
+    <div class="summary">
+      <div class="summary-hero">
+        <div class="big-pct ${pctCls}">${pct}%</div>
+        <div class="sub">${s.correct} correct / ${s.answered} answered ${s.total - s.answered ? `· ${s.total - s.answered} skipped` : ''}</div>
+      </div>
+      <div class="summary-block"><h3>Per-domain accuracy</h3>${domHTML || `<div style="font-size:13px;color:var(--muted)">No domains had answers in this batch.</div>`}</div>
+      <div class="summary-block"><h3>Tier change report</h3>${tcHTML}</div>
+      <div class="summary-block"><h3>Missed questions ${s.missed?.length ? `(${s.missed.length})` : ''}</h3><ul>${missedHTML}</ul></div>
+      <div class="quiz-toolbar">
+        <button class="btn btn-primary" onclick="generateBatch()">🎯 Generate Next 50 (Adaptive)</button>
+        <button class="btn btn-purple" id="btnStudyGuide" onclick="downloadStudyGuide('${s.batch_id}', this)" ${(s.missed && s.missed.length) ? '' : 'disabled title="No missed questions in this batch"'}>📚 Generate Study Guide PDF</button>
+        <button class="btn btn-ghost"   onclick="renderQuizEmpty()">📊 Dashboard</button>
+      </div>
+    </div>`;
+}
+
+/* ─── Study Guide PDF download (per-batch) ─────────────────────────── */
+async function downloadStudyGuide(batchId, btn) {
+  if (!batchId || btn?.dataset.busy === '1') return;
+  btn.dataset.busy = '1';
+  btn.disabled = true;
+  btn.style.display = 'none';
+  const ctl = mountStudyGuideProgress('📚 Building study guide for this batch…');
+  try {
+    const res = await fetch(`/api/batches/${batchId}/study-guide`, { method: 'POST' });
+    if (!res.ok) {
+      const err = await safeErr(res);
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    const blob = await res.blob();
+    const cd = res.headers.get('content-disposition') || '';
+    const m = cd.match(/filename="?([^";]+)"?/i);
+    const fname = m ? m[1] : `cissp-study-guide-${new Date().toISOString().slice(0,10)}.pdf`;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fname;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    ctl.done();
+    btn.style.display = '';
+    btn.disabled = false; btn.dataset.busy = '0';
+  } catch (e) {
+    ctl.fail(e.message);
+    btn.style.display = '';
+    btn.disabled = false; btn.dataset.busy = '0';
+    alert('Study guide failed: ' + e.message + '\n\nThis feature requires Python + ReportLab on the server. Run:\n  python -m pip install -r requirements.txt');
+  }
+}
+
+/* ─── Coach this: bridge to chat ─────────────────────────────────────────── */
+function coachThis(qid) {
+  // We don't have full question loaded for missed-list items, so we just send a prompt.
+  if (!currentBatch?.question || currentBatch.question.id !== qid) {
+    // Fallback: ask coach about the most recent batch by ID — fetch that question.
+    fetch(`/api/batches/current`).catch(() => {});
+  }
+  const q = currentBatch?.question?.id === qid ? currentBatch.question : null;
+  let stem;
+  if (q) {
+    stem = `${q.question}\n\nA. ${q.options.A}\nB. ${q.options.B}\nC. ${q.options.C}\nD. ${q.options.D}\n\n`
+         + `(My answer: ${q.user_answer || 'none'} · Correct: ${q.correct} · Domain ${q.domain} · Tier ${TIERS[q.difficulty].name})\n`
+         + `Walk me through the full 7-step breakdown for this one.`;
+  } else {
+    stem = `Coach me on question id ${qid}. Walk me through the full 7-step breakdown.`;
+  }
+  switchTab('chat');
+  sendChat(stem);
+}
+
+/* ─── Chat ───────────────────────────────────────────────────────────────── */
+function killWelcome() { document.getElementById('welcomeScreen')?.remove(); }
+
+function addMsg(role, md, streaming = false) {
+  killWelcome();
+  const chat = document.getElementById('chatArea');
+  const wrap = document.createElement('div');
+  wrap.className = `msg ${role === 'user' ? 'user' : 'ai'}`;
+  const label   = role === 'user' ? '👤 You' : '🛡️ CISSP Coach';
+  const copyBtn = role === 'user' ? '' : `<button class="copy-btn" onclick="copyMsg(this)" title="Copy">📋</button>`;
+  wrap.innerHTML = `<div class="msg-head"><span>${label}</span>${copyBtn}</div>` +
+                   `<div class="msg-body">${streaming ? '' : marked.parse(md)}</div>`;
+  chat.appendChild(wrap);
+  scrollDown();
+  return wrap.querySelector('.msg-body');
+}
+
+function copyMsg(btn) {
+  const body = btn.closest('.msg').querySelector('.msg-body');
+  navigator.clipboard.writeText(body.innerText).then(() => {
+    btn.textContent = '✅';
+    setTimeout(() => { btn.textContent = '📋'; }, 2000);
+  });
+}
+
+function showThinking() {
+  killWelcome();
+  const el = document.createElement('div');
+  el.id = 'thinking';
+  el.className = 'thinking';
+  el.innerHTML = `<span>🛡️ Coach is analyzing</span><div class="dots"><span></span><span></span><span></span></div>`;
+  document.getElementById('chatArea').appendChild(el);
+  scrollDown();
+}
+function hideThinking() { document.getElementById('thinking')?.remove(); }
+
+function isChatNearBottom() {
+  const c = document.getElementById('chatArea');
+  if (!c) return true;
+  return (c.scrollHeight - c.scrollTop - c.clientHeight) < 48;
+}
+function updateJumpLatest() {
+  const c = document.getElementById('chatArea');
+  const btn = document.getElementById('jumpLatest');
+  if (!c || !btn) return;
+  const show = !isChatNearBottom() && c.scrollHeight > (c.clientHeight + 40);
+  btn.classList.toggle('visible', show);
+}
+function onChatScroll() { chatPinnedToBottom = isChatNearBottom(); updateJumpLatest(); }
+function jumpToLatest() {
+  const c = document.getElementById('chatArea'); if (!c) return;
+  chatPinnedToBottom = true;
+  c.scrollTo({ top: c.scrollHeight, behavior: 'smooth' });
+  updateJumpLatest();
+}
+function scrollDown(force = false) {
+  const c = document.getElementById('chatArea'); if (!c) return;
+  requestAnimationFrame(() => {
+    if (force || chatPinnedToBottom || isChatNearBottom()) {
+      c.scrollTop = c.scrollHeight;
+      chatPinnedToBottom = true;
+    }
+    updateJumpLatest();
+  });
+}
+
+async function renderChatHistory() {
+  let hist = [];
+  try { hist = await apiGet('/api/chat/history'); } catch {}
+  if (!hist.length) return;
+  killWelcome();
+  const chat = document.getElementById('chatArea');
+  chat.innerHTML = '';
+  for (const m of hist) addMsg(m.role, m.content);
+  scrollDown(true);
+}
+
+async function clearChatHistory() {
+  const btn = document.getElementById('btnClearChat');
+  if (!confirm('Delete all chat history?\n\nThis only clears the Chat Coach conversation — your question DB, batch history, and stats are untouched.')) return;
+  if (btn) btn.disabled = true;
+  try {
+    await apiDel('/api/chat/history');
+    document.getElementById('chatArea').innerHTML =
+      '<div class="welcome" id="welcomeScreen">' +
+      '<div class="welcome-icon">💬</div>' +
+      '<h1>Chat Coach</h1>' +
+      '<p class="welcome-sub">Paste any CISSP question for a 7-step "Think Like a Manager" breakdown.</p>' +
+      '</div>';
+    chatPinnedToBottom = true;
+    updateJumpLatest();
+  } catch (e) {
+    alert('Clear chat failed: ' + e.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function sendChat(text) {
+  if (busy || !text.trim()) return;
+  busy = true;
+  document.getElementById('qInput').disabled = true;
+  document.getElementById('bSend').disabled  = true;
+  addMsg('user', text);
+  showThinking();
+  try {
+    hideThinking();
+    const bodyEl = addMsg('assistant', '', true);
+    let full = '';
+    await apiSSE('/api/chat/stream', { message: text }, {
+      token: ev => {
+        full += ev.text || '';
+        bodyEl.innerHTML = marked.parse(full);
+        scrollDown();
+      },
+      error: ev => {
+        bodyEl.innerHTML = marked.parse(`❌ **Error:** ${ev.message || 'unknown'}`);
+      },
+      done: () => { /* persisted server-side */ },
+    });
+  } catch (e) {
+    hideThinking();
+    addMsg('assistant', `❌ **Error:** ${e.message}`);
+  }
+  busy = false;
+  document.getElementById('qInput').disabled = false;
+  document.getElementById('bSend').disabled  = false;
+  document.getElementById('qInput')?.focus();
+}
+
+function submit() {
+  const el = document.getElementById('qInput');
+  const text = el.value.trim();
+  if (!text) return;
+  el.value = '';
+  grow(el);
+  sendChat(text);
+}
+function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); } }
+function grow(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 140) + 'px'; }
+
+/* ─── Settings ───────────────────────────────────────────────────────────── */
+function populateModels(provider, currentModel) {
+  const list = MODELS[provider] || MODELS.openai;
+  const sel = document.getElementById('modelSelect');
+  sel.innerHTML = list.map(m =>
+    `<option value="${m.id}"${m.id === currentModel ? ' selected' : ''}>${m.label}</option>`
+  ).join('');
+  if (!list.find(m => m.id === currentModel)) sel.selectedIndex = 0;
+}
+function onProviderChange() {
+  const prov = document.getElementById('providerSelect').value;
+  populateModels(prov, MODELS[prov][0].id);
+}
+function openSettings() {
+  document.getElementById('providerSelect').value = settings.provider;
+  populateModels(settings.provider, settings.model);
+  const ks = document.getElementById('keyStatus');
+  ks.innerHTML =
+    `<span class="${settings.has_openai    ? 'ok' : 'err'}">${settings.has_openai    ? '✅' : '❌'} OPENAI_API_KEY</span>` +
+    `<span class="${settings.has_anthropic ? 'ok' : 'err'}">${settings.has_anthropic ? '✅' : '❌'} ANTHROPIC_API_KEY</span>`;
+  document.getElementById('settingsModal').classList.remove('hidden');
+}
+function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
+async function saveSettings() {
+  const provider = document.getElementById('providerSelect').value;
+  const model    = document.getElementById('modelSelect').value;
+  try {
+    settings = await apiPatch('/api/settings', { provider, model });
+    closeSettings();
+    updateStats();
+    if (activeTab === 'quiz') renderQuizPane();
+  } catch (e) { alert('Save failed: ' + e.message); }
+}
+function overlayClick(e) { if (e.target === e.currentTarget) closeSettings(); }
+
+/* ─── DB import / export ────────────────────────────────────────────────── */
+async function exportDB() {
+  try {
+    const res = await fetch('/api/export');
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cissp-coach-db-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (e) { alert('Export failed: ' + e.message); }
+}
+
+async function resetAllData() {
+  if (!confirm('⚠️ This will permanently DELETE every question, batch, chat message, domain stat, and tier progression.\n\nYour API keys (in .env) and provider/model selection are preserved. This cannot be undone.\n\nContinue?')) return;
+  if (!confirm('Last warning — really wipe everything and start fresh?')) return;
+  try {
+    await apiPost('/api/data/reset', {});
+    closeSettings();
+    currentBatch = null;
+    await refreshDashboard();
+    await refreshCurrentBatch();
+    document.getElementById('chatArea').innerHTML =
+      '<div class="welcome" id="welcomeScreen">' +
+      '<div class="welcome-icon">💬</div>' +
+      '<h1>Chat Coach</h1>' +
+      '<p class="welcome-sub">Paste any CISSP question for a 7-step "Think Like a Manager" breakdown.</p>' +
+      '</div>';
+    updateStats();
+    renderQuizPane();
+  } catch (e) { alert('Reset failed: ' + e.message); }
+}
+
+function importDB(evt) {
+  const file = evt.target.files?.[0];
+  if (!file) return;
+  if (!confirm('Importing will REPLACE your question DB, stats, and difficulty levels. Continue?')) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      await apiPost('/api/import', data);
+      await refreshDashboard();
+      await refreshCurrentBatch();
+      updateStats();
+      renderQuizPane();
+      alert('✅ Import complete.');
+    } catch (err) { alert('❌ Import failed: ' + err.message); }
+  };
+  reader.readAsText(file);
+  evt.target.value = '';
+}
+
+/* ─── Util ───────────────────────────────────────────────────────────────── */
+function escapeHTML(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+</script>
+</body>
+</html>
